@@ -26,7 +26,7 @@ export const createRuntime = async () => {
   const graphbackConfig = await getConfig();
   const schemaText = loadSchema(graphbackConfig.model);
 
-  // NOTE: For SQLLite db should be always recreated
+  // NOTE: For SQLLite db we always need to recreate db from scratch
   migrateDB(graphbackConfig.dbmigrations, schemaText).then((ops) => {
     console.log("Migrated database", ops);
   });
