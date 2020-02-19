@@ -6,26 +6,26 @@ export class RESTDataProvider<Type = any, GraphbackContext = any> implements Gra
     // Base url of the endpoint. When creating an RESTDataProvider instance, a string is passed into the constructor.
     protected baseUrl : string;
     protected baseType : GraphQLObjectType;
-    protected headers : JSON
+    protected headers : any;
 
     //constructor
-    public constructor(baseType: GraphQLObjectType, baseUrl:string,headers:JSON) {
+    public constructor(baseType: GraphQLObjectType, baseUrl:string, headers:any) {
       this.baseUrl = baseUrl;
       this.baseType = baseType;
       this.headers = headers;
     }
 
     /** 
-     * @param data - JSON object which carries the data needed for the create operation
-     * @param context - Context carries the path needed to create a valid endpoint url
+      @param data - JSON object which carries the data needed for the update operation
+     * @param context -passed by the resolvers
      * 
      * valid url => (baseUrl+path) 
-     * baseUrl is defined at instance creation via the constructor. path is passed at runtime via 
-     * the context parameter.
+     * baseUrl is defined at instance creation via the constructor. path is created from baseType name and other passed values.
      * 
      */
     async create(data: Type, context?: GraphbackContext): Promise<Type> {
-        const url = `${this.baseUrl}/${this.baseType.name.toLowerCase()}`   
+        console.log(this.baseType.name.toLocaleLowerCase())
+        const url = `${this.baseUrl}/${this.baseType.name.toLowerCase()}/`   
         const res = await fetch(url, {
             method: 'post',
             body:    JSON.stringify(data),
@@ -39,15 +39,14 @@ export class RESTDataProvider<Type = any, GraphbackContext = any> implements Gra
     /**
      * 
      * @param data - JSON object which carries the data needed for the update operation
-     * @param context -Context carries the path needed to create a valid endpoint url
+     * @param context -passed by the resolvers
      * 
      * valid url => (baseUrl+path) 
-     * baseUrl is defined at instance creation via the constructor. path is passed at runtime via 
-     * the context parameter.
+     * baseUrl is defined at instance creation via the constructor. path is created from baseType name and other passed values.
      * 
      */
     async update(data: Type, context?: GraphbackContext): Promise<Type> {
-        const url = this.baseUrl+`/${this.baseType}`+`/${data['id']}`
+        const url = this.baseUrl+`/${this.baseType.name.toLocaleLowerCase}`+`/${data['id']}`
         const res = await fetch(url,{
             method: 'PUT',
             body:    JSON.stringify(data),
@@ -59,17 +58,16 @@ export class RESTDataProvider<Type = any, GraphbackContext = any> implements Gra
 
     /**
      * 
-     * @param data - JSON object which carries the data needed for the update operation
-     * @param context - Context carries the path needed to create a valid endpoint url
+ @param data - JSON object which carries the data needed for the update operation
+     * @param context -passed by the resolvers
      * 
      * valid url => (baseUrl+path) 
-     * baseUrl is defined at instance creation via the constructor. path is passed at runtime via 
-     * the context parameter.
+     * baseUrl is defined at instance creation via the constructor. path is created from baseType name and other passed values.
      * 
      * 
      */
     async delete(data: Type, context?: GraphbackContext): Promise<Type> {
-        const url = this.baseUrl+`/${this.baseType}/${data['id']}` 
+        const url = this.baseUrl+`/${this.baseType.name.toLocaleLowerCase()}/${data['id']}` 
         const res = await fetch(url,{
             method:'DELETE',
             body:JSON.stringify(data),
@@ -82,15 +80,14 @@ export class RESTDataProvider<Type = any, GraphbackContext = any> implements Gra
 
     /**
      * 
-     * @param context - Context carries the path needed to create a valid endpoint url
+     * @param context -passed by the resolvers
      * 
      * valid url => (baseUrl+path) 
-     * baseUrl is defined at instance creation via the constructor. path is passed at runtime via 
-     * the context parameter.
+     * baseUrl is defined at instance creation via the constructor. path is created from baseType name and other passed values.
      * 
      */
     async findAll(context?: GraphbackContext): Promise<Type[]> {
-        const url = this.baseUrl+`/${this.baseType}`
+        const url = this.baseUrl+`/${this.baseType.name.toLocaleLowerCase()}/`
         const res = await fetch(url)
         const json = await res.json()
         return json
@@ -111,7 +108,7 @@ export class RESTDataProvider<Type = any, GraphbackContext = any> implements Gra
      *      url = www.jboss.com/api/v2/users/id/se006575
      */
     async findBy(filter: any, context?: GraphbackContext): Promise<Type[]> {
-        const url = this.baseUrl+`/${this.baseType}`+`/${filter['filterType']}/${filter['value']}`
+        const url = this.baseUrl+`/${this.baseType.name.toLocaleLowerCase()}`+`/${filter['id']}`
         const res = await fetch(url)
         const json = await res.json()
         return json

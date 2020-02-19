@@ -1,25 +1,30 @@
 import _test, { TestInterface } from 'ava';
-
+import { buildSchema, GraphQLObjectType } from 'graphql';
 import { RESTDataProvider } from '../../src/data/RESTDataProvider';
+
+
+const schema = buildSchema(`
+"""
+@model
+"""
+type Users {
+ name: String!
+ job: String!
+
+}
+`);
 
 interface Context {
     provider: RESTDataProvider;
 }
 
-interface Project {
-    category_id: number;
-    name: string;
-}
-
 const test = _test as TestInterface<Context>;
+const modelType = schema.getType('Users') as GraphQLObjectType
 
 test.beforeEach(async t => {
-    const provider = new RESTDataProvider('http://64.225.124.94:7000/api');
-  
+    const provider = new RESTDataProvider(modelType,'https://reqres.in/api',{'Content-Type': 'application/json'});
     t.context = { provider };
 });
-
-
 
 /**
  * 
@@ -29,34 +34,43 @@ test.beforeEach(async t => {
  */
 
 
-// test for findAll
-test('find all Project categories', async t => {
-    const projectCategories = await t.context.provider.findAll('category_manage/category');
-    console.log("findALL",projectCategories)
-    t.assert(projectCategories['data'].length > 0);
+//test for findAll
+test('find all persons', async t => {
+    const result = await t.context.provider.findAll();
+    console.log("findALL",result)
+    t.assert(result['total'] > 0);
 });
 
-// test for create
-test('create Project category',async t => {
-    const project_category = {name:'JBoss'}
-    const result = await t.context.provider.create(project_category,'category_manage/category')
+//test for create
+test('create a person',async t => {
+    const person = {name:'JBossss',job:'Software engineer'}
+    const result = await t.context.provider.create(person)
     console.log("create",result)
-    t.assert(result['data']['affectedRows'] === 1)
+    t.assert(result.name === person.name)
 })
 
 
-// test for delete.
-test('delete a project category',async t => {
-    const data = {category_id:16};
-    const result = await t.context.provider.delete(data,'category_manage/category')
-    console.log('delete',result)
-    t.assert(result['data']['affectedRows'] ===1);
-})
-
-
-// test('update a project category',async t => {
-//     const updated = {id:"1",name:"updated"}
-//     const result = await t.context.provider.update(updated,'unicorns')
-//     t.assert(result['data']['affectedRows'] === 1);
+//test for delete.
+// test('delete a person with id',async t => {
+//     const person = {id:16};
+//     const result = await t.context.provider.delete(person)
+//     console.log('delete',result)
+//     t.assert(result.id === person.id);
 // })
+
+//test for update
+test('update a person with id',async t => {
+    const updated = {id:"1",name:"updated",job:"updated"}
+    const result = await t.context.provider.update(updated)
+    console.log(result)
+    t.assert(result['id'] === updated['id']);
+})
+
+//test for findBy
+test('find a person by id',async t => {
+    const updated = {id:"1"}
+    const result = await t.context.provider.update(updated)
+    console.log(result)
+    t.assert(result['id'] === updated['id']);
+})
 
