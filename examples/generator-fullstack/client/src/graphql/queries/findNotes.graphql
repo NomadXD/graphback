@@ -1,5 +1,0 @@
-query findNotes($fields: NoteFields!) {
-    findNotes(fields: $fields) {
-      ...NoteExpandedFields
-    }
-  }
