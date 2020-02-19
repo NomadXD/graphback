@@ -1,13 +1,18 @@
 import { GraphbackDataProvider } from './GraphbackDataProvider';
+import { GraphQLObjectType } from 'graphql';
 const fetch = require('node-fetch');
 
 export class RESTDataProvider<Type = any, GraphbackContext = any> implements GraphbackDataProvider<Type, GraphbackContext>{
     // Base url of the endpoint. When creating an RESTDataProvider instance, a string is passed into the constructor.
     protected baseUrl : string;
+    protected baseType : GraphQLObjectType;
+    protected headers : JSON
 
     //constructor
-    public constructor(type: GraphqlObjectType, baseUrl:string) {
+    public constructor(baseType: GraphQLObjectType, baseUrl:string,headers:JSON) {
       this.baseUrl = baseUrl;
+      this.baseType = baseType;
+      this.headers = headers;
     }
 
     /** 
@@ -20,11 +25,11 @@ export class RESTDataProvider<Type = any, GraphbackContext = any> implements Gra
      * 
      */
     async create(data: Type, context?: GraphbackContext): Promise<Type> {
-        const url = `${this.baseUrl}/${this.type.name.toLowerCase()}`   
+        const url = `${this.baseUrl}/${this.baseType.name.toLowerCase()}`   
         const res = await fetch(url, {
             method: 'post',
             body:    JSON.stringify(data),
-            headers: { 'Content-Type': 'application/json' },
+            headers: this.headers,
         })
         const json = await res.json();
         return json;
@@ -42,11 +47,11 @@ export class RESTDataProvider<Type = any, GraphbackContext = any> implements Gra
      * 
      */
     async update(data: Type, context?: GraphbackContext): Promise<Type> {
-        const url = this.baseUrl+`/${context!==undefined ? context : ""}`+`/${data['id']}`
+        const url = this.baseUrl+`/${this.baseType}`+`/${data['id']}`
         const res = await fetch(url,{
             method: 'PUT',
             body:    JSON.stringify(data),
-            headers: { 'Content-Type': 'application/json' },
+            headers: this.headers,
             })
         const json = await res.json()
         return json;
@@ -64,11 +69,11 @@ export class RESTDataProvider<Type = any, GraphbackContext = any> implements Gra
      * 
      */
     async delete(data: Type, context?: GraphbackContext): Promise<Type> {
-        const url = this.baseUrl+`/${context!==undefined ? context : ""}` 
+        const url = this.baseUrl+`/${this.baseType}/${data['id']}` 
         const res = await fetch(url,{
             method:'DELETE',
             body:JSON.stringify(data),
-            headers: { 'Content-Type': 'application/json' },
+            headers: this.headers,
         })
         const json = await res.json();
         return json;
@@ -85,7 +90,7 @@ export class RESTDataProvider<Type = any, GraphbackContext = any> implements Gra
      * 
      */
     async findAll(context?: GraphbackContext): Promise<Type[]> {
-        const url = this.baseUrl+`/${context}`
+        const url = this.baseUrl+`/${this.baseType}`
         const res = await fetch(url)
         const json = await res.json()
         return json
@@ -106,7 +111,7 @@ export class RESTDataProvider<Type = any, GraphbackContext = any> implements Gra
      *      url = www.jboss.com/api/v2/users/id/se006575
      */
     async findBy(filter: any, context?: GraphbackContext): Promise<Type[]> {
-        const url = this.baseUrl+`/${context!==undefined ? context : ""}`+`/${filter['filterType']}/${filter['value']}`
+        const url = this.baseUrl+`/${this.baseType}`+`/${filter['filterType']}/${filter['value']}`
         const res = await fetch(url)
         const json = await res.json()
         return json
