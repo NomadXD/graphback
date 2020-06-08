@@ -18,15 +18,21 @@ export const deleteTemplate = (modelName: string): string => {
     }`
 }
 
-export const findAllTemplate = (modelName: string): string => {
+export const findOneTemplate = (modelName: string): string => {
   return `(parent, args, context) => {
-      return context.${modelName}.findAll();
+      return context.${modelName}.findOne(args);
+    }`
+}
+
+export const findAllTemplate = (modelName: string): string => {
+  return `(parent, { page }, context) => {
+      return context.${modelName}.findAll(page);
     }`
 }
 
 export const findTemplate = (modelName: string): string => {
-  return `(parent, args, context) => {
-      return context.${modelName}.findBy(args.fields);
+  return `(parent, { filter, orderBy, page }, context) => {
+      return context.${modelName}.findBy(filter, orderBy, page);
     }`
 }
 
@@ -54,12 +60,17 @@ export const deletedSubscriptionTemplate = (modelName: string): string => {
     }`
 }
 
-export const blankResolver = `(parent, args, context) => {
-    // Implementation here
-}`;
+export const oneToManyTemplate = (modelName: string, relationField: string, idField: string) => {
+  return `(parent, { filter }, context) => {
+    return context.${modelName}.batchLoadData('${relationField}', parent.${idField}, filter, context);
+  }
+  `;
+}
 
-export const blankSubscription = `{
-    subscribe: (parent, args, context) => {
-        // Implementation here
-    }
-}`
+export const oneToOneTemplate = (modelName: string, relationField: string, idField: string) => {
+  return `(parent, args, context) => {
+    return context.${modelName}.findBy({ ${idField}: parent.${relationField} })
+     .then((results) => results[0]);
+  }
+  `;
+}

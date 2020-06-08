@@ -1,21 +1,33 @@
 {
   "docs": {
+    "Introduction": [
+      "gettingstarted"
+    ],
     "Getting Started": [
-      "gettingstarted",
-      "datamodel",
-      "config",
-      "custom"
+      "intro/quickstart",
+      "intro/existingproject",
+      "intro/serverless",
+      "intro/graphqlserve",
+      "intro/datamodel",
+      "intro/config"
     ],
-    "Concepts": [
-      "concepts",
-      "runtime",
-      "datasources",
-      "relationships",
-      "clientqueries"
+    "CRUD": [
+      "crud/crudspec",
+      "crud/crudruntime"
     ],
-    "Migrations": [
-      "migrations",
-      "openapi"
+    "Generator Plugins": [
+      "plugins/plugin-intro",
+      "plugins/crud-schema",
+      "plugins/crud-client",
+      "plugins/customplugin"
+    ],
+    "Database": [
+      "db/dbintroduction",
+      "db/datasources",
+      "db/dbmigrations"
+    ],
+    "Migrating to Graphback": [
+      "migrations/openapi"
     ],
     "Reference": [
       "commands"

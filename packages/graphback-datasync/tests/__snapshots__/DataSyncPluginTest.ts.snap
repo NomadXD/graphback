@@ -1,0 +1,52 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Test snapshot config gql 1`] = `
+"\\"\\"\\"
+@model
+@versioned
+@delta
+\\"\\"\\"
+type Comment {
+  id: ID!
+  title: String!
+  description: String!
+
+  \\"\\"\\"@manyToOne field: 'comments', key: 'noteId'\\"\\"\\"
+  noteComment: Note!
+}
+
+type CommentDeltaList {
+  items: [Comment]
+  lastSync: String
+}
+
+type Mutation {
+  likeNote(id: ID!): Note!
+}
+
+\\"\\"\\"
+@model
+@versioned
+@delta
+\\"\\"\\"
+type Note {
+  id: ID!
+  title: String!
+  description: String!
+
+  \\"\\"\\"@oneToMany field: 'noteComment', key: 'noteId'\\"\\"\\"
+  comments: [Comment]!
+}
+
+type NoteDeltaList {
+  items: [Note]
+  lastSync: String
+}
+
+type Query {
+  getLikedNotes(id: ID!, names: [String]!): Note!
+  syncNotes(lastSync: String!): NoteDeltaList!
+  syncComments(lastSync: String!): CommentDeltaList!
+}
+"
+`;

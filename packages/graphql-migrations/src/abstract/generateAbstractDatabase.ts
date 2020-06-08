@@ -1,5 +1,5 @@
 /* eslint-disable max-lines */
-import { DatabaseNameTransform, defaultTableNameTransform, lowerCaseFirstChar } from '@graphback/core';
+import { DatabaseNameTransform, defaultTableNameTransform, lowerCaseFirstChar, parseRelationshipAnnotation, isModelType } from '@graphback/core';
 import {
   GraphQLField,
   GraphQLObjectType,
@@ -13,11 +13,12 @@ import {
   isScalarType,
   GraphQLEnumValue,
 } from 'graphql'
-import { parseAnnotations, stripAnnotations } from 'graphql-annotations'
+import { parseAnnotations, stripAnnotations } from 'graphql-metadata';
 // eslint-disable-next-line import/no-internal-modules
 import { TypeMap } from 'graphql/type/schema'
 import { escapeComment } from '../util/comments'
 import getObjectTypeFromList from '../util/getObjectTypeFromList'
+import getKnexColumnType from '../util/getKnexColumnType';
 import { AbstractDatabase } from './AbstractDatabase'
 import getColumnTypeFromScalar, { TableColumnTypeDescriptor } from './getColumnTypeFromScalar'
 import { OneToManyRelationship } from './RelationshipTypes'
@@ -102,7 +103,7 @@ class AbstractDatabaseBuilder {
     for (const key of Object.keys(this.typeMap)) {
       const type = this.typeMap[key]
       // Tables
-      if (isObjectType(type) && !type.name.startsWith('__') && !ROOT_TYPES.includes(type.name)) {
+      if (isObjectType(type) && !type.name.startsWith('__') && !ROOT_TYPES.includes(type.name) && isModelType(type)) {
         this.buildTable(type)
       }
     }
@@ -189,6 +190,7 @@ class AbstractDatabaseBuilder {
     fieldType?: GraphQLOutputType,
   ): TableColumn | undefined {
     const annotations: any = parseAnnotations('db', field.description || undefined)
+    const relationshipMarker = parseRelationshipAnnotation(field.description);
 
     if (annotations.skip) {
       return undefined
@@ -232,7 +234,7 @@ class AbstractDatabaseBuilder {
 
       // Object
     } else if (isObjectType(fieldType)) {
-      columnName = annotations.name || `${field.name}Id`
+      columnName = relationshipMarker?.key || annotations.name || `${field.name}Id`
       const foreignType = this.typeMap[fieldType.name]
       if (!foreignType) {
         console.warn(`Foreign type ${fieldType.name} not found on field ${this.currentType}.${field.name}.`)
@@ -258,7 +260,7 @@ class AbstractDatabaseBuilder {
 
         return undefined
       }
-      type = descriptor.type
+      type = getKnexColumnType(descriptor.type)
       args = descriptor.args
       foreign = {
         type: foreignType.name,
@@ -424,16 +426,16 @@ class AbstractDatabaseBuilder {
       args: args || [],
       nullable: !notNull,
       foreign,
-      // eslint-disable-next-line no-null/no-null
-      defaultValue: annotations.default !== null ? annotations.default : null,
+      defaultValue: annotations.default,
     }
   }
 
   private createOneToManyRelationship(oneToManyRelationship: OneToManyRelationship) {
     const annotations: any = parseAnnotations('db', oneToManyRelationship.description || undefined);
+    const relationshipMarker = parseRelationshipAnnotation(oneToManyRelationship.description);
 
     const field: GraphQLField<any, any> = {
-      name: annotations.oneToMany || lowerCaseFirstChar(oneToManyRelationship.relation.name),
+      name: relationshipMarker?.field || annotations.oneToMany || lowerCaseFirstChar(oneToManyRelationship.relation.name),
       type: oneToManyRelationship.relation,
       description: oneToManyRelationship.description,
       args: [],

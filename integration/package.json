@@ -1,47 +1,35 @@
 {
   "name": "graphback-integration-tests",
-  "version": "0.10.2",
+  "version": "0.14.0-alpha2",
   "private": true,
   "description": "Integration tests",
   "main": "index.js",
   "scripts": {
     "develop": "echo disabled",
     "build": "echo disabled",
-    "test": "ava",
+    "integration": "jest --runInBand",
     "lint": "echo disabled",
     "start": "echo disabled",
     "pretest": "yarn build"
   },
   "dependencies": {
-    "apollo-boost": "0.4.7",
-    "graphback": "0.10.2",
-    "graphql": "^14.0.0",
-    "graphql-testx": "0.3.0",
-    "knex": "0.20.9",
+    "@graphql-toolkit/file-loading": "0.10.7",
+    "apollo-boost": "0.4.9",
+    "apollo-server": "2.14.2",
+    "apollo-server-testing": "2.14.2",
+    "jest": "26.0.1",
+    "knex": "0.21.1",
     "node-fetch": "2.6.0"
-  },
-  "ava": {
-    "files": [
-      "tests/**/*"
-    ],
-    "compileEnhancements": false,
-    "extensions": [
-      "ts"
-    ],
-    "require": [
-      "ts-node/register"
-    ]
   },
   "engines": {
     "node": ">=10.15.3"
   },
   "devDependencies": {
-    "ava": "2.4.0",
-    "graphql": "14.6.0",
     "rimraf": "3.0.2",
-    "ts-node": "8.6.2",
+    "sqlite3": "4.2.0",
+    "ts-node": "8.10.2",
     "tsutils": "3.17.1",
-    "typescript": "3.7.5"
+    "typescript": "3.9.5"
   },
   "license": "Apache-2.0"
 }

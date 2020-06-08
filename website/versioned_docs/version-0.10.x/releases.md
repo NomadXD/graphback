@@ -1,7 +1,6 @@
 ---
-id: version-0.10.x-releases
 title: Releases
-original_id: releases
+id: releases
 ---
 
 ## What's new in Graphback
@@ -62,11 +61,6 @@ This creates a `userId` foreign key column in the `message` table. Visit the [re
 BREAKING changes for CLI/ and runtime.
 
 ### Graphback-CLI
-
-- Removed `init` method 
-
-Init method is no longer available. To start new boilerplate project
-please use graphql-cli `init` command instead that now incorporates Graphback.
 
 ### Graphback
 

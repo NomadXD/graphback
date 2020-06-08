@@ -1,6 +1,6 @@
 {
   "name": "@graphback/core",
-  "version": "0.10.2",
+  "version": "0.14.0-alpha2",
   "description": "Api for building Graphback generator metadata",
   "main": "dist/index.js",
   "types": "types/index.d.ts",
@@ -13,42 +13,34 @@
     "build": "tsc",
     "watch": "tsc -w ",
     "lint": "eslint -t stylish --project \"tsconfig.json\"",
-    "test": "ava",
-    "pretest": "yarn build"
-  },
-  "ava": {
-    "files": [
-      "tests/**/*"
-    ],
-    "compileEnhancements": false,
-    "extensions": [
-      "ts"
-    ],
-    "require": [
-      "ts-node/register"
-    ]
+    "test": "jest --coverage",
+    "test:watch": "jest --watch"
   },
   "engines": {
     "node": ">=10.15.3"
   },
   "devDependencies": {
-    "@types/node": "12.12.27",
+    "@types/jest": "25.2.3",
+    "@types/node": "12.12.44",
     "@types/pino": "5.20.0",
-    "ava": "2.4.0",
     "graphql": "14.6.0",
+    "jest": "26.0.1",
     "rimraf": "3.0.2",
-    "ts-node": "8.6.2",
-    "tslint": "5.20.1",
-    "typescript": "3.7.5"
+    "ts-jest": "25.5.1",
+    "ts-node": "8.10.2",
+    "tslint": "6.1.2",
+    "typescript": "3.9.5"
   },
   "license": "Apache-2.0",
   "publishConfig": {
     "access": "public"
   },
   "dependencies": {
+    "@graphql-toolkit/common": "0.10.7",
     "glob": "7.1.6",
-    "graphql-metadata": "0.5.0",
-    "pino": "5.16.0",
+    "graphql-compose": "7.18.1",
+    "graphql-metadata": "0.6.2",
+    "pino": "6.3.2",
     "pluralize": "8.0.0"
   },
   "peerDependencies": {

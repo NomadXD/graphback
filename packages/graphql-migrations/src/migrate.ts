@@ -7,7 +7,7 @@ import { computeDiff } from './diff/computeDiff'
 import { MigrationResults } from './diff/Operation'
 import { MigrateOperationFilter } from './plugin/MigrateOperationFilter';
 import { MigratePlugin } from './plugin/MigratePlugin'
-import { removeDirectivesFromSchema } from './util/removeDirectivesFromSchema';
+import { SchemaTransformerPlugin } from './plugin/SchemaTransformer';
 
 export interface MigrateOptions {
   /**
@@ -53,6 +53,11 @@ export interface MigrateOptions {
    * from array
    */
   operationFilter?: MigrateOperationFilter
+
+  /**
+   * Customise schema before performing migration
+   */
+  schemaTransformer?: SchemaTransformerPlugin
 }
 
 export const defaultOptions: MigrateOptions = {
@@ -64,12 +69,12 @@ export const defaultOptions: MigrateOptions = {
   mapListToJson: true,
   plugins: [],
   debug: false,
-  removeDirectivesFromSchema: true
+  removeDirectivesFromSchema: true,
 }
 
 export async function migrateDB(
   config: Knex.Config,
-  schemaText: string,
+  schema: GraphQLSchema | string,
   options: MigrateOptions = {},
 ): Promise<MigrationResults> {
   //Default options
@@ -89,13 +94,6 @@ export async function migrateDB(
     }
   }
 
-  let schema: GraphQLSchema;
-  if (finalOptions.removeDirectivesFromSchema) {
-    schema = removeDirectivesFromSchema(schemaText);
-  } else {
-    schema = buildSchema(schemaText)
-  }
-
   //Read current
   const existingAdb = await read(
     config,
@@ -104,8 +102,19 @@ export async function migrateDB(
     finalOptions.dbColumnPrefix,
   )
 
+  let finalSchema: GraphQLSchema;
+  if (typeof schema === "string") {
+    finalSchema = buildSchema(schema);
+  } else {
+    finalSchema = schema
+  }
+
+  // if (finalOptions.schemaTransformer) {
+  //   finalSchema = finalOptions.schemaTransformer.transform(finalSchema)
+  // }
+
   //Generate new
-  const newAdb = await generateAbstractDatabase(schema, {
+  const newAdb = await generateAbstractDatabase(finalSchema, {
     scalarMap: finalOptions.scalarMap,
   })
   if (finalOptions.debug) {

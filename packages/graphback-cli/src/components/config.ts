@@ -13,11 +13,11 @@ export async function installDependencies(database: string): Promise<void> {
   await execa('npm', ['i'])
   if (database === 'pg') {
     await execa('npm', ['i', '-S', 'pg'])
-  } else if (database === 'sqlite3') {
-    await execa('npm', ['i', '-S', 'sqlite3'])
+    await execa('npm', ['i', '-S', '@graphback/runtime-knex'])
+  } else if (database === 'MongoDB') {
+    await execa('npm', ['i', '-S', 'mongodb'])
+    await execa('npm', ['i', '-S', '@graphback/runtime-mongo'])
   }
-  //Using opiniated layer
-  await execa('npm', ['i', '-S', '@graphback/runtime'])
 }
 
 function postSetupMessage(): string {
@@ -25,9 +25,9 @@ function postSetupMessage(): string {
 Graphback configuration successfully bootstrapped :rocket:
 
 Next Steps:
-1. Review your configuration in "graphqlrc.yaml" file
-2. Edit the *.graphql files inside your model folder.
-3. Run  generate command to generate your schema and resolvers
+1. Review your configuration in your ${chalk.green('.graphqlrc')} file
+2. Edit the ${chalk.green('*.graphql')} files inside your model folder
+3. Run ${chalk.cyan('graphback generate')} to generate your schema and resolvers
 `
 }
 
@@ -42,6 +42,8 @@ export interface InitOptions {
   model?: ModelTemplate
   //skip install
   skipInstall?: boolean
+  // Skip config generation
+  skipConfig?: boolean
 }
 
 /**
@@ -51,15 +53,19 @@ export interface InitOptions {
 export async function initConfig(options: InitOptions = {}) {
   logInfo(chalk.yellow(
     figlet.textSync('Graphback', { horizontalLayout: 'full' })
-  ))
+  ));
 
-  const { modelName, content } = options.model || await createModel()
+  const model = options.model || await createModel()
   const database = options.database || await chooseDatabase()
   const client = options.client || await askForClient()
-  addModel("", modelName, content)
+  if (model) {
+    addModel("", model.modelName, model.content)
+  }
   if (!options.skipInstall) {
     await installDependencies(database)
   }
-  await createConfig(database, client)
+  if (!options.skipConfig) {
+    await createConfig(database, client)
+  }
   logInfo(postSetupMessage())
 }

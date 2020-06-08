@@ -1,6 +1,6 @@
 {
   "name": "@graphback/codegen-schema",
-  "version": "0.10.2",
+  "version": "0.14.0-alpha2",
   "description": "GraphQL-Code-Generator compatibile schema generator",
   "main": "dist/index.js",
   "types": "types/index.d.ts",
@@ -13,20 +13,7 @@
     "build": "tsc",
     "watch": "tsc -w ",
     "lint": "eslint -t stylish --project \"tsconfig.json\"",
-    "test": "ava",
-    "pretest": "yarn build"
-  },
-  "ava": {
-    "files": [
-      "tests/**/*"
-    ],
-    "compileEnhancements": false,
-    "extensions": [
-      "ts"
-    ],
-    "require": [
-      "ts-node/register"
-    ]
+    "test": "jest"
   },
   "engines": {
     "node": ">=10.15.3"
@@ -36,21 +23,23 @@
     "access": "public"
   },
   "devDependencies": {
-
-    "@types/node": "12.12.27",
-    "ava": "2.4.0",
+    "@types/jest": "25.2.3",
+    "@types/node": "12.12.44",
     "graphql": "14.6.0",
+    "jest": "26.0.1",
     "rimraf": "3.0.2",
-    "ts-node": "8.6.2",
+    "ts-jest": "25.5.1",
+    "ts-node": "8.10.2",
     "tsutils": "3.17.1",
-    "typescript": "3.7.5"
+    "typescript": "3.9.5"
   },
   "dependencies": {
-    "@graphback/core": "0.10.2",
-    "@graphql-toolkit/common": "0.9.7",
-    "@graphql-toolkit/core": "0.9.7",
-    "@graphql-toolkit/schema-merging": "0.9.7",
-    "graphql-metadata": "0.5.0",
+    "@graphback/core": "0.14.0-alpha2",
+    "@graphql-toolkit/common": "0.10.7",
+    "@graphql-toolkit/core": "0.10.7",
+    "@graphql-toolkit/schema-merging": "0.10.7",
+    "graphql-compose": "7.18.1",
+    "graphql-metadata": "0.6.2",
     "pluralize": "8.0.0"
   },
   "peerDependencies": {

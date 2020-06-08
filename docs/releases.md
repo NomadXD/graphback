@@ -8,12 +8,101 @@ title: Releases
 This file contains changes and migration steps for the Graphback project. 
 Please follow individual releases for more information.
 
+# 0.14.0
+
+## Migrating to 0.14.0
+
+Version 0.14.0 removed support code generation for resolvers. 
+If you used one of the Codegen templates you will need to migrate 
+
+1. Remove your generated resolvers and model file. They are not longer needed as resolvers are generated at runtime.
+Check configuration of the resolvers plugin to see where they are located.
+2. Remove @graphback/codegen-resolvers from your package and the config.
+3. Use Graphback runtime Getting Started Guide 
+4. Change your client output format from `gqlwithfragment` to `graphql`
+5. Replace `outputPath` with `outputFile` in your client config 
+6. The `outputFile` specifies the output path of the generated file
+7. Change your documents path in graphback config to match new `outputFile`
+8. Delete previously generated client documents and rerun generate command
+9. Be sure to correct your documents path in your codegen config if you use GraphQL-Code-Generator
+
+## Breaking
+
+- Removed `graphback db` command. Database migrations can be only executed from the codebase when application is started.
+For more information please refer to https://graphback.dev/docs/db/dbmigrations
+- Graphback resolver plugin is no longer used. Code generator plugin is deprecated.
+- GraphbackPluginEngine accepts now object instead of arguments.
+`new GraphbackPluginEngine({schema})`
+- Removed `gqlwithfragment` format in client
+
+##### New Features
+
+- All client documents are now generated in a single file. The file's path is specified by the `outputFile` field in client config
+- `outputPath` in client config has been removed
+- Added new templates to graphback init commands. All templates now giving ability to add client side application.
+
+
+
+# 0.13.0
+
+Invalid release
+
+# 0.12.0
+
+##### New Features
+
+* Add fragment only mode ([c1297e21](https://github.com/aerogear/graphback/commit/c1297e21a482f7db2e3c987b7623e5fd5cd1fe03)) 
+* **cli:**  add mongodb template option ([ce304da8](https://github.com/aerogear/graphback/commit/ce304da808aa8302d8e8f778a2ac9f18ace31ab3))
+*  add mongo-runtime template ([6b313bf8](https://github.com/aerogear/graphback/commit/6b313bf8c2e96d433cfd48cb5d918ef9b1f5b660))
+
+##### Bug Fixes
+
+*  Print schema with directives ([#1147](https://github.com/aerogear/graphback/pull/1147)) ([2c72ddb0](https://github.com/aerogear/graphback/commit/2c72ddb03058a6b5c478fe28067325aebd172d5e))
+*  Mongo batching for types ([7ea4b6d4](https://github.com/aerogear/graphback/commit/7ea4b6d4297ce6764496095acb937209c3395989))
+*  Mongo batching with string as key ([#1130](https://github.com/aerogear/graphback/pull/1130)) ([e49d03a8](https://github.com/aerogear/graphback/commit/e49d03a8d9bde8ce7b33978bc227afa6a9b73f5a))
+*  Add additional assign for the crud modifiers ([660d2a53](https://github.com/aerogear/graphback/commit/660d2a53b6ca21debb469122044ad7e29d9720b7))
+*  Problem with CRUD config being global ([fc138d27](https://github.com/aerogear/graphback/commit/fc138d27b3b072ca64a34bde61ab935626833589))
+*  check for undefined ID value ([34021a20](https://github.com/aerogear/graphback/commit/34021a203ac1f1a44a5bf98547eed64208400b92))
+*  throw error when no ID is supplied ([1256f71d](https://github.com/aerogear/graphback/commit/1256f71d26f9486f95fbd5b64f9a879db8e25e9d))
+*  accept globs and array of globs for model option in config ([#1067](https://github.com/aerogear/graphback/pull/1067)) ([2756b29a](https://github.com/aerogear/graphback/commit/2756b29adb3696a99b499574299fc9b2f35e0d36))
+*  Fix Pagination in Knex Provider ([df469dc8](https://github.com/aerogear/graphback/commit/df469dc8a73e99cc9b3b40b2330c3de7466b6886))
+*  Fix pagination in MongoDB provider ([7a8618e0](https://github.com/aerogear/graphback/commit/7a8618e08201769fc397562e6f90192123bec743))
+*  Add pagination to findBy queries ([f0b8e1d5](https://github.com/aerogear/graphback/commit/f0b8e1d527c64834d3640dd842a17dc3baa4135b))
+*  Update LayeredRuntimeResolverCreator to use pagination in findall ([b1a22846](https://github.com/aerogear/graphback/commit/b1a228466e3f254e4fbf9044d0f2053ef1939866))
+*  Update CRUD services to use pagination in findall ([33527825](https://github.com/aerogear/graphback/commit/3352782588761dc6cf00a792673a47572129835e))
+* **resolvers:**  export generated code ([eea38a5d](https://github.com/aerogear/graphback/commit/eea38a5df848b310be884039e3e51ac5eb51a81e))
+
+# 0.11.4
+
+##### Bug Fixes
+
+*  don't generate blank model file ([ca29103e](https://github.com/aerogear/graphback/commit/ca29103e236800462bf110775c3f243adc363b44))
+*  remove generation of dbmigrations config in `graphback config` ([f0b8ed4](https://github.com/aerogear/graphback/commit/f0b8ed45af536e4157c9a3d2bc74b18369eac488))
+
+# 0.11.1
+
+- Fixed issue where root query type needed to properly created final schema.
+- Remove serve from graphback-cli
+
 # 0.11.0
 
+New features:
 
+- [`graphql-serve`](https://github.com/aerogear/graphback/tree/master/packages/graphql-serve) - a fully functional GraphQL server based on Graphback and Apollo Server.
+- MongoDB support.
+- Pagination support.
 
-### Graphback
+Other new features and changes documented in blog post: 
+https://medium.com/@wtr/graphback-plugin-based-realtime-database-generator-78f4f608b81e
 
+Breaking changes:
+
+- BREAKING: `@oneToMany` and `@oneToOne` annotations are required to map relationships.
+- BREAKING: Configuration format changed from `graphback.json` to `graphqlrc.yml`
+- BREAKING: CRUDService api was changed to support per entity model
+- BREAKING: CRUDService api was changed to support per entity model
+- BREAKING: Runtime API was changed. Graphback package exports now GraphbackRuntime class to create runtime layer.
+- BREAKING: @model annotation is required for type to use generation
 - BREAKING: Removed GraphbackBackend and related interfaces.
 
 - BREAKING: Removed Production migrations engine
@@ -63,13 +152,6 @@ This creates a `userId` foreign key column in the `message` table. Visit the [re
 # 0.10.0
 
 BREAKING changes for CLI/ and runtime.
-
-### Graphback-CLI
-
-- Removed `init` method 
-
-Init method is no longer available. To start new boilerplate project
-please use graphql-cli `init` command instead that now incorporates Graphback.
 
 ### Graphback
 

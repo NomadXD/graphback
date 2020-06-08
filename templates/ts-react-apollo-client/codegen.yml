@@ -1,0 +1,14 @@
+schema: ../src/schema/schema.graphql
+documents: ./src/graphql/**/**.graphql
+generates:
+  ./src/generated-types.tsx:
+    plugins:
+      - add: '/* tslint:disable */'
+      - typescript
+      - typescript-operations
+      - typescript-react-apollo
+    config:
+      withComponent: false
+      withHOC: false
+      withHooks: true
+      skipDocumentsValidation: false

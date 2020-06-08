@@ -1,16 +1,24 @@
-""" @model   """
+""" 
+@model
+@versioned
+@delta   
+@crud.delete: false
+"""
 type Note {
   id: ID!
   title: String!
   description: String!
   ## Relationship
   """
-  @db.oneToMany: 'noteComment'
+  @oneToMany field: 'noteComment'
   """
   comment: [Comment]!
 }
 
-""" @model   """
+""" 
+@model   
+@crud.create: false
+"""
 type Comment {
   id: ID!
   title: String!

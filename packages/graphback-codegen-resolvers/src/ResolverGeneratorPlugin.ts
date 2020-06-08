@@ -3,10 +3,13 @@ import { OutputFileSystem } from './GeneratorModel';
 import { GeneratorResolversFormat } from './GeneratorResolversFormat';
 import { generateCRUDResolversFunctions } from './templates/createResolvers';
 import { createResolverTemplate } from './templates/resolverWrapper';
-import { createRuntimeFile } from './templates/runtimeTemplate';
+import { createModelsFile } from './templates/modelTemplate';
 import { writeResolvers } from './writeResolvers';
 
 export interface ResolverGeneratorPluginConfig {
+    /**
+     * Extension of the generated files 
+     */
     format: 'ts' | 'js'
 
     /**
@@ -15,7 +18,7 @@ export interface ResolverGeneratorPluginConfig {
     outputPath: string
 
     /**
-     * Name of the generated resolvers file (default: resolvers.(format))
+     * Name of the generated resolvers file (default: graphbackResolvers.(format))
      */
     resolversFileName?: string
 
@@ -49,11 +52,14 @@ export class ResolverGeneratorPlugin extends GraphbackPlugin {
         this.pluginConfig = Object.assign({
             format: 'ts',
             layout: "apollo",
-            resolversFileName: 'resolvers',
+            resolversFileName: 'graphbackResolvers',
         }, pluginConfig);
         if (!pluginConfig.outputPath) {
             throw new Error("resolver plugin requires outputPath parameter")
         }
+
+        // eslint-disable-next-line no-console
+        console.error("Resolvers plugin will not work with the latest CRUD spec. Please follow https://graphback.dev/docs/releases guide to migrate to runtime approach")
     }
 
     public getPluginName() {
@@ -77,7 +83,7 @@ export class ResolverGeneratorPlugin extends GraphbackPlugin {
 
         const generatedResolversFunctions = generateCRUDResolversFunctions(models);
         const generatedResolverFile = this.createGeneratedResolversFile(generatedResolversFunctions, this.pluginConfig);
-        const contextFile = createRuntimeFile(models, this.pluginConfig);
+        const contextFile = createModelsFile(models, this.pluginConfig);
 
         return {
             resolvers: generatedResolverFile,
@@ -89,7 +95,7 @@ export class ResolverGeneratorPlugin extends GraphbackPlugin {
         const generatedResolvers = createResolverTemplate(resolvers, pluginConfig);
 
         return {
-            fileName: `resolvers.${pluginConfig.format}`,
+            fileName: `${pluginConfig.resolversFileName}.${pluginConfig.format}`,
             output: generatedResolvers
         };
     }

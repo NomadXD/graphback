@@ -1,0 +1,66 @@
+{
+  "name": "graphql-serve",
+  "version": "0.14.0-alpha2",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "license": "Apache 2.0",
+  "typescript": {
+    "definition": "types/index.d.ts"
+  },
+  "bin": {
+    "gqls": "dist/index.js"
+  },
+  "scripts": {
+    "clean": "rimraf coverage dist types",
+    "build": "tsc",
+    "watch": "tsc -w",
+    "test": "jest",
+    "lint": "eslint --ext js,ts .",
+    "print-schema": "ts-node bin/printSchema.ts"
+  },
+  "devDependencies": {
+    "@types/express": "4.17.6",
+    "@types/jest": "25.2.3",
+    "@types/node": "12.12.44",
+    "@types/pino": "5.20.0",
+    "@typescript-eslint/eslint-plugin": "2.34.0",
+    "@typescript-eslint/parser": "2.34.0",
+    "babel-eslint": "10.1.0",
+    "eslint": "6.8.0",
+    "eslint-config-prettier": "6.11.0",
+    "graphql-request": "1.8.2",
+    "jest": "26.0.1",
+    "rimraf": "3.0.2",
+    "ts-jest": "25.5.1",
+    "ts-node": "8.10.2",
+    "typescript": "3.9.5"
+  },
+  "dependencies": {
+    "@graphback/codegen-client": "0.14.0-alpha2",
+    "@graphback/codegen-schema": "0.14.0-alpha2",
+    "@graphback/core": "0.14.0-alpha2",
+    "@graphback/runtime": "0.14.0-alpha2",
+    "@graphback/runtime-knex": "0.14.0-alpha2",
+    "@graphback/runtime-mongo": "0.14.0-alpha2",
+    "apollo-server-express": "2.14.2",
+    "cors": "2.8.5",
+    "express": "4.17.1",
+    "get-port": "5.1.1",
+    "glob": "7.1.6",
+    "graphback": "0.14.0-alpha2",
+    "graphql": "14.6.0",
+    "graphql-config": "3.0.2",
+    "graphql-migrations": "0.14.0-alpha2",
+    "graphql-subscriptions": "1.1.0",
+    "graphql-tag": "2.10.3",
+    "knex": "0.21.1",
+    "knex-cleaner": "1.3.0",
+    "mongodb": "3.5.8",
+    "mongodb-memory-server": "6.6.1",
+    "sqlite3": "4.2.0",
+    "yargs": "15.3.1"
+  },
+  "peerDependencies": {
+    "graphql": "^0.12.0 || ^0.13.0 || ^14.0.0"
+  }
+}

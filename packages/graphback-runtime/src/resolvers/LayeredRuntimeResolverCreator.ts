@@ -1,4 +1,4 @@
-import { getFieldName, getSubscriptionName, GraphbackOperationType, ModelDefinition } from '@graphback/core';
+import { getFieldName, getSubscriptionName, GraphbackOperationType, ModelDefinition, getPrimaryKey, FieldRelationshipMetadata, getDeltaQuery } from '@graphback/core';
 import { GraphbackCRUDService } from '../service/GraphbackCRUDService'
 
 /**
@@ -67,26 +67,46 @@ export class LayeredRuntimeResolverCreator {
         }
       }
 
-      if (resolverElement.crudOptions.findAll) {
-        const findAllField = getFieldName(modelName, GraphbackOperationType.FIND_ALL);
+      if (resolverElement.crudOptions.findOne) {
+        const findOneField = getFieldName(modelName, GraphbackOperationType.FIND_ONE);
+        const primaryKeyLabel = getPrimaryKey(resolverElement.graphqlType).name;
         //tslint:disable-next-line: no-any
-        resolvers.Query[findAllField] = (parent: any, args: any, context: any) => {
+        resolvers.Query[findOneField] = (parent: any, args: any, context: any) => {
           if (!this.services[modelName]) {
             throw new Error(`Missing service for ${modelName}`);
           }
 
-          return this.services[modelName].findAll(context)
+          return this.services[modelName].findOne({ [primaryKeyLabel]: args.id }, context)
         }
       }
       if (resolverElement.crudOptions.find) {
         const findField = getFieldName(modelName, GraphbackOperationType.FIND);
         //tslint:disable-next-line: no-any
         resolvers.Query[findField] = (parent: any, args: any, context: any) => {
-          return this.services[modelName].findBy(args.fields, context)
+          return this.services[modelName].findBy(args.filter, args.orderBy, args.page, context)
         }
       }
 
-      this.createRelations(resolverElement, resolvers)
+      // If delta marker is encountered, add resolver for `delta` query
+      if (resolverElement.config.deltaSync) {
+        const deltaQuery = getDeltaQuery(resolverElement.graphqlType.name)
+
+        resolvers.Query[deltaQuery] = async (parent: any, args: any, context: any) => {
+          const res = await this.services[modelName].findBy({ updatedAt:{ gt: args.lastSync }}, undefined, undefined, context);
+          
+          return {
+            ...res,
+            lastSync: Date.now()
+          }
+        }
+      }
+
+      const relationResolvers = this.createRelations(resolverElement.relationships);
+
+      if (relationResolvers) {
+        resolvers[modelName] = relationResolvers;
+      }
+
       this.createSubscriptions(resolverElement, resolvers)
     }
 
@@ -150,40 +170,35 @@ export class LayeredRuntimeResolverCreator {
     }
   }
 
-  private createRelations(resolverElement: ModelDefinition, resolvers: any) {
-    const fields = Object.values(resolverElement.graphqlType.getFields());
-    for (const field of fields) {
-      //This is very very broken. Commented out 
-      //FIXME
-      //TODO
-      //Warning!
-      //if (field.isType) {
-      //if (field.annotations.OneToOne || !field.isArray) {
-      //// TODO - this is very wrong
-      //let foreignIdName = `${modelName.toLowerCase()}Id`;
-      //if (field.annotations.OneToOne) {
-      //foreignIdName = field.annotations.OneToOne.field;
-      //}
-      //}
-      //else if (field.annotations.OneToMany || field.isArray) {
-      //// TODO - this is very wrong
-      //let foreignId = `${modelName.toLowerCase()}Id`;
-      //if (field.annotations.OneToMany) {
-      //foreignId = field.annotations.OneToMany.field;
-      //}
+  private createRelations(relationships: FieldRelationshipMetadata[]) {
+    if (!relationships.length) { return undefined }
 
-      //if (resolvers[modelName] === undefined) {
-      //resolvers[modelName] = {};
-      //}
+    const resolvers = {};
+    for (const relationship of relationships) {
+      let resolverFn: any;
+      const modelName = relationship.relationType.name;
+      const relationIdField = getPrimaryKey(relationship.relationType);
 
-      //// tslint:disable-next-line: no-any
-      //// TODO - this is very wrong
-      //resolvers[modelName][field.name] = (parent: any, args: any, context: any) => {
-      //return this.service.findBy(field.type.toLowerCase(), { [foreignId]: parent.id }, context);
-      //};
-      //}
-      //}
+      if (!this.services[modelName]) {
+        throw new Error(`Missing service for ${modelName}`);
+      }
+
+      if (relationship.kind === 'oneToMany') {
+        resolverFn = (parent: any, args: any, context: any) => {
+          return this.services[modelName].batchLoadData(relationship.relationForeignKey, parent[relationIdField.name], args.filter, context);
+        }
+      } else {
+        resolverFn = (parent: any, args: any, context: any) => {
+          return this.services[modelName].findOne({ [relationIdField.name]: parent[relationship.relationForeignKey] });
+        }
+      }
+
+      if (resolverFn) {
+        resolvers[relationship.ownerField.name] = resolverFn;
+      }
     }
+
+    return resolvers;
   }
 }
 

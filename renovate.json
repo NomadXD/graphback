@@ -5,9 +5,13 @@
   ],
   "groupName": "all",
   "ignoreDeps": [
-    "chalk",
-    "ava"
+    "ora",
+    "chalk"
   ],
+  "automerge": true,
+  "major": {
+    "automerge": false
+  },
   "ignorePaths": [
     "**/node_modules/**",
     "**/__tests__/**",

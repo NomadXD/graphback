@@ -1,14 +1,29 @@
+directive @test(description: String) on FIELD_DEFINITION | ENUM_VALUE
+
+""" @model """
 type Note {
   id: ID!
-  title: String!
+  title: String! @test(description: "mock directive")
   description: String!
-  ## Relationship
   """
-  @db.oneToMany: 'noteComment'
+  @oneToMany field: 'noteComment', key: 'note_id'
   """
-  comment: [Comment]!
+  comments: [Comment]!
+  """
+  @oneToOne key: 'test_id'
+  """
+  test: Test
 }
 
+"""
+@model
+"""
+type Test {
+  id: ID!
+  name: String
+}
+
+""" @model """
 type Comment {
   id: ID!
   title: String!
@@ -23,3 +38,23 @@ type Query {
 type Mutation {
   likeNote(id: ID!): Note!
 }
+
+"""
+Model added to test schema generation using enum. 
+See issue https://github.com/aerogear/graphback/issues/1299
+
+@model
+"""
+type  Issue {
+  id: ID!
+  category: IssueCategory
+  createdAt: DateTime
+}
+
+enum IssueCategory {
+ BUG
+ QUESTION
+ FEATURE_REQUEST
+}
+
+scalar DateTime

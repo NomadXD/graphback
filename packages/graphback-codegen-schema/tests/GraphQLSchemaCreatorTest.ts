@@ -1,16 +1,15 @@
 import { readFileSync } from 'fs';
-import test, { ExecutionContext } from 'ava';
 import { buildSchema, printSchema } from 'graphql';
-import { GraphbackCoreMetadata } from '@graphback/core';
+import { GraphbackCoreMetadata, printSchemaWithDirectives } from '@graphback/core';
 import { SchemaCRUDPlugin } from '../src/SchemaCRUDPlugin';
 
 const schemaText = readFileSync(`${__dirname}/mock.graphql`, 'utf8')
 
-test('Test snapshot config gql', async (t: ExecutionContext) => {
+test('Test snapshot config gql', async () => {
   const defautConfig = {
     "create": true,
     "update": true,
-    "findAll": true,
+    "findOne": true,
     "find": true,
     "delete": true,
     "subCreate": true,
@@ -24,15 +23,15 @@ test('Test snapshot config gql', async (t: ExecutionContext) => {
     crudMethods: defautConfig
   }, buildSchema(schemaText))
   const schema = schemaGenerator.transformSchema(metadata)
-  t.snapshot(printSchema(schema));
+  expect(printSchemaWithDirectives(schema)).toMatchSnapshot();
 });
 
 
-test('Test snapshot config ts', async (t: ExecutionContext) => {
+test('Test snapshot config ts', async () => {
   const defautConfig = {
     "create": true,
     "update": true,
-    "findAll": true,
+    "findOne": true,
     "find": true,
     "delete": true,
     "subCreate": true,
@@ -46,15 +45,15 @@ test('Test snapshot config ts', async (t: ExecutionContext) => {
     crudMethods: defautConfig
   }, buildSchema(schemaText))
   const schema = schemaGenerator.transformSchema(metadata)
-  t.snapshot(printSchema(schema));
+  expect(printSchema(schema)).toMatchSnapshot();
 });
 
 
-test('Test snapshot config js', async (t: ExecutionContext) => {
+test('Test snapshot config js', async () => {
   const defautConfig = {
     "create": true,
     "update": true,
-    "findAll": true,
+    "findOne": true,
     "find": true,
     "delete": true,
     "subCreate": true,
@@ -68,5 +67,47 @@ test('Test snapshot config js', async (t: ExecutionContext) => {
     crudMethods: defautConfig
   }, buildSchema(schemaText))
   const schema = schemaGenerator.transformSchema(metadata)
-  t.snapshot(printSchema(schema));
+  expect(printSchema(schema)).toMatchSnapshot();
+});
+
+test('Test one side relationship schema query type generation', async () => {
+  const defautConfig = {
+    "create": false,
+    "update": false,
+    "findOne": true,
+    "find": true,
+    "delete": false,
+    "subCreate": false,
+    "subUpdate": false,
+    "subDelete": false
+  }
+
+  const schemaText = `""" @model """
+  type Note {
+    id: ID!
+    title: String!
+    description: String!
+    """
+    @oneToMany field: 'note', key: 'test_id'
+    """
+    tests: [Test]!
+  }
+  
+  """
+  @model
+  """
+  type Test {
+    id: ID!
+    name: String
+  }
+  `;
+
+  const oneSidedSchema = buildSchema(schemaText);
+  const schemaGenerator = new SchemaCRUDPlugin({ format: 'graphql', outputPath: './tmp' })
+  const metadata = new GraphbackCoreMetadata({
+    crudMethods: defautConfig
+  }, oneSidedSchema)
+
+  const transformedSchema = schemaGenerator.transformSchema(metadata)
+  expect(printSchema(transformedSchema)).toMatchSnapshot()
 });
